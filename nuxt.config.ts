@@ -13,6 +13,12 @@ export default defineNuxtConfig({
   vite: {
     vue: {
       ...templateCompilerOptions
+    },
+    optimizeDeps: {
+      include: ['@tresjs/cientos', 'three-custom-shader-material/vanilla']
+    },
+    ssr: {
+      noExternal: ['@tresjs/cientos', 'three-custom-shader-material/vanilla']
     }
   }
 })

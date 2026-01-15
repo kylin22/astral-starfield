@@ -1,12 +1,13 @@
 <template>
   <TresCanvas>
-    <Starfield/>
+    <Starfield_test/>
   </TresCanvas>
 </template>
 
-<script lang="ts" setup>
-  import { TresCanvas } from "@tresjs/core";
+<script setup lang="ts">
+  import { TresCanvas } from "@tresjs/core"
   import Starfield from "./components/Starfield.vue";
+  import Starfield_test from "./components/Starfield_test.vue";
 </script>
 
 <style lang="scss">
