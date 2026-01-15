@@ -9,23 +9,21 @@
     :moveSpeed="1.0"
   />
   <TresPoints v-if="positions.length">
-    <!-- <TresBufferGeometry>
-      <TresBufferAttribute 
-        :args="[positions, 3]" 
-        attach="attributes-position" 
-      /> 
-      <TresBufferAttribute 
-        :args="[colors, 3]" 
-        attach="attributes-color" 
+    <TresBufferGeometry>
+      <TresBufferAttribute
+        :args="[positions, 3]"
+        attach="attributes-position"
       />
-    </TresBufferGeometry> -->
-    <TresBufferGeometry
-      :position="[positions, 3]"
-    />
-    <TresPointsMaterial 
-      :vertexColors="true"
-      :size="0.5" 
-      :size-attenuation="true" 
+      <TresBufferAttribute
+        :args="[colors, 3]"
+        attach="attributes-color"
+      />
+    </TresBufferGeometry>
+    <TresShaderMaterial
+      :vertex-shader="vertexShader"
+      :fragment-shader="fragmentShader"
+      :uniforms="{ size: { value: 2.0 } }" 
+      :vertex-colors="true"
     />
   </TresPoints>
 </template>
@@ -35,6 +33,11 @@
   import { PointerLockControls, KeyboardControls } from "@tresjs/cientos"
   import { parse } from "papaparse"
   // import { gaiaBP_RPtoRGB } from "~/utils/gaiaColorConversion"
+  import vertexShader from "../shaders/pointsCircle.vert"
+  import fragmentShader from '../shaders/pointsCircle.frag';
+  const emit = defineEmits<{
+    (e: "loaded"): void
+  }>()
 
   interface StarData {
     x: string,
@@ -44,7 +47,7 @@
   }
 
   const positions = shallowRef<Float32Array>(new Float32Array(0));
-  // const colors = shallowRef<Float32Array>(new Float32Array(0));
+  const colors = shallowRef<Float32Array>(new Float32Array(0));
 
   onMounted(async () => {
     const response = await fetch("/brightest_cartesian.csv");
@@ -69,7 +72,8 @@
 
     // preallocate Float32Array
     const coordsArray = new Float32Array(validCount * 3);
-    const colorsArray = new Float32Array(validCount * 3)
+    const colorsArray = new Float32Array(validCount * 3);
+    colorsArray.fill(1.0); //temp white
 
     // fill by index
     let index = 0;
@@ -88,15 +92,17 @@
 
       // const rgb = gaiaBP_RPtoRGB(bp_rp)
       // // normalize 0-1 for TresJS
-      // colorsArray[index] = rgb[0] / 255
-      // colorsArray[index + 1] = rgb[1] / 255
-      // colorsArray[index + 2] = rgb[2] / 255
+      // colorsArray[index] = rgb[0]
+      // colorsArray[index + 1] = rgb[1]
+      // colorsArray[index + 2] = rgb[2]
 
       index += 3;
     }
 
     positions.value = coordsArray;
-    // colors.value = colorsArray;
+    colors.value = colorsArray;
+
+    emit("loaded");
   });
 </script>
 

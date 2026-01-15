@@ -10,6 +10,10 @@ export default defineNuxtConfig({
   build: {
     transpile: ["three"]
   },
+  modules: ['@tresjs/nuxt', '@nuxt/devtools'],
+  tres: {
+    glsl: true,
+  },
   vite: {
     vue: {
       ...templateCompilerOptions
@@ -19,6 +23,6 @@ export default defineNuxtConfig({
     },
     ssr: {
       noExternal: ['@tresjs/cientos', 'three-custom-shader-material/vanilla']
-    }
+    },
   }
 })
