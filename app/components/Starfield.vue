@@ -19,6 +19,11 @@
         attach="attributes-color"
       />
     </TresBufferGeometry>
+    <!-- <TresPointsMaterial 
+      :vertexColors="true"
+      :size="0.5" 
+      :size-attenuation="true" 
+    /> -->
     <TresShaderMaterial
       :vertex-shader="vertexShader"
       :fragment-shader="fragmentShader"
@@ -30,11 +35,10 @@
 
 <script lang="ts" setup>
   import { onMounted } from "vue"
-  import { PointerLockControls, KeyboardControls } from "@tresjs/cientos"
   import { parse } from "papaparse"
-  // import { gaiaBP_RPtoRGB } from "~/utils/gaiaColorConversion"
-  import vertexShader from "../shaders/pointsCircle.vert"
-  import fragmentShader from '../shaders/pointsCircle.frag';
+  import { bprpToRGB } from "~/utils/gaiaColorConversion"
+  import vertexShader from "../shaders/point.vert?raw"
+  import fragmentShader from "../shaders/point.frag?raw"
   const emit = defineEmits<{
     (e: "loaded"): void
   }>()
@@ -50,7 +54,7 @@
   const colors = shallowRef<Float32Array>(new Float32Array(0));
 
   onMounted(async () => {
-    const response = await fetch("/brightest_cartesian.csv");
+    const response = await fetch("/shortlist_cartesian.csv");
     const csvText = await response.text();
 
     const tempData = parse<StarData>(csvText, {
@@ -90,18 +94,17 @@
       coordsArray[index + 1] = y;
       coordsArray[index + 2] = z;
 
-      // const rgb = gaiaBP_RPtoRGB(bp_rp)
-      // // normalize 0-1 for TresJS
-      // colorsArray[index] = rgb[0]
-      // colorsArray[index + 1] = rgb[1]
-      // colorsArray[index + 2] = rgb[2]
+      const rgb = bprpToRGB(bp_rp);
+      // normalize 0-1 for TresJS
+      colorsArray[index] = rgb[0] / 255;
+      colorsArray[index + 1] = rgb[1] / 255;
+      colorsArray[index + 2] = rgb[2] / 255;
 
       index += 3;
     }
 
     positions.value = coordsArray;
     colors.value = colorsArray;
-
     emit("loaded");
   });
 </script>

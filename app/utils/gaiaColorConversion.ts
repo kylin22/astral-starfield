@@ -1,63 +1,43 @@
-// const bpRpToTeff = (bp_rp: number): number => {
-//   const bp = Math.min(Math.max(bp_rp, -0.5), 4.0)
+const bprpToTeff = (bprp: number) => {
+    return 5040/(0.4929+0.5092*bprp-0.0353*bprp**2);
+} 
 
-//   const logT =
-//     3.981 -
-//     0.654 * bp +
-//     0.158 * bp * bp -
-//     0.032 * bp * bp * bp
+export const bprpToRGB = (bprp: number): [number, number, number] => {
+    // range check
+    const teff = bprpToTeff(bprp);
+    const colourTemperature = Math.min(40000, Math.max(1000, teff));
+    const tmpInternal = colourTemperature / 100.0;
 
-//   return Math.pow(10, logT)
-// }
+    let red: number;
+    let green: number;
+    let blue: number;
 
-// const temperatureToRGB = (tempK: number): [number, number, number] => {
-//   // Guard against bad input
-//   if (!Number.isFinite(tempK)) {
-//     return [1, 1, 1]
-//   }
+    // red
+    if (tmpInternal <= 66) {
+        red = 255;
+    } else {
+        red = 329.698727446 * Math.pow(tmpInternal - 60, -0.1332047592);
+    }
 
-//   // Clamp to physically meaningful range
-//   const T = Math.max(1000, Math.min(40000, tempK)) / 100
+    // green
+    if (tmpInternal <= 66) {
+        green = 99.4708025861 * Math.log(tmpInternal) - 161.1195681661;
+    } else {
+        green = 288.1221695283 * Math.pow(tmpInternal - 60, -0.0755148492);
+    }
 
-//   let r = 0
-//   let g = 0
-//   let b = 0
+    // blue
+    if (tmpInternal >= 66) {
+        blue = 255;
+    } else if (tmpInternal <= 19) {
+        blue = 0;
+    } else {
+        blue = 138.5177312231 * Math.log(tmpInternal - 10) - 305.0447927307;
+    }
 
-//   // Red
-//   if (T <= 66) {
-//     r = 255
-//   } else {
-//     r = 329.698727446 * Math.pow(T - 60, -0.1332047592)
-//     r = Math.min(255, Math.max(0, r))
-//   }
-
-//   // Green
-//   if (T <= 66) {
-//     g = 99.4708025861 * Math.log(T) - 161.1195681661
-//   } else {
-//     g = 288.1221695283 * Math.pow(T - 60, -0.0755148492)
-//   }
-//   g = Math.min(255, Math.max(0, g))
-
-//   // Blue
-//   if (T >= 66) {
-//     b = 255
-//   } else if (T <= 19) {
-//     b = 0
-//   } else {
-//     b = 138.5177312231 * Math.log(T - 10) - 305.0447927307
-//     b = Math.min(255, Math.max(0, b))
-//   }
-
-//   // Normalize to 0–1 for Three.js
-//   return [r / 255, g / 255, b / 255]
-// }
-
-// export const gaiaBP_RPtoRGB = (bp_rp: number): [number, number, number] => {
-//   if (!Number.isFinite(bp_rp)) {
-//     return [1, 1, 1]
-//   }
-
-//   const teff = bpRpToTeff(bp_rp)
-//   return temperatureToRGB(teff)
-// }
+    return [
+        Math.min(255, Math.max(0, Math.round(red))),
+        Math.min(255, Math.max(0, Math.round(green))),
+        Math.min(255, Math.max(0, Math.round(blue))),
+    ];
+}

@@ -1,16 +1,14 @@
-import vue from '@vitejs/plugin-vue'
-import { templateCompilerOptions } from '@tresjs/core'
+import vue from "@vitejs/plugin-vue"
+import { templateCompilerOptions } from "@tresjs/core"
+import glsl from "vite-plugin-glsl"
 
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
   devServer: {
     port: 9999
   },
-  build: {
-    transpile: ["three"]
-  },
-  modules: ['@tresjs/nuxt', '@nuxt/devtools'],
+  modules: ["@tresjs/nuxt", "@nuxt/devtools"],
   tres: {
     glsl: true,
   },
@@ -19,10 +17,11 @@ export default defineNuxtConfig({
       ...templateCompilerOptions
     },
     optimizeDeps: {
-      include: ['@tresjs/cientos', 'three-custom-shader-material/vanilla']
+      include: ["@tresjs/cientos", "three-custom-shader-material/vanilla"]
     },
     ssr: {
-      noExternal: ['@tresjs/cientos', 'three-custom-shader-material/vanilla']
+      noExternal: ["@tresjs/cientos", "three-custom-shader-material/vanilla"]
     },
+    plugins: [glsl()]
   }
 })
