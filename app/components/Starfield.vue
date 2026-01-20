@@ -31,9 +31,9 @@
 
 <script lang="ts" setup>
   import { parse } from "papaparse"
-  import { bprpToRGBA } from "~/utils/gaiaColorConversion"
   import vertexShader from "../shaders/point.vert?raw"
   import fragmentShader from "../shaders/point.frag?raw"
+import { bprpToTeff, teffToAlpha, teffToRGB } from "~/utils/gaiaColorConversion";
 
   const props = defineProps<{
     moveSpeed: number,
@@ -90,19 +90,22 @@
         typeof y !== "number" ||
         typeof z !== "number" ||
         typeof bp_rp !== "number"
-      ) continue;
+      ) continue; // possible NaNs
 
       coordsArray[coordIndex] = x;
       coordsArray[coordIndex + 1] = y;
       coordsArray[coordIndex + 2] = z;
       coordIndex += 3;
 
-      const rgba = bprpToRGBA(bp_rp);
-      colorsArray[colorIndex] = rgba[0];   // r
-      colorsArray[colorIndex + 1] = rgba[1];   // g
-      colorsArray[colorIndex + 2] = rgba[2];   // b
+      const teff = bprpToTeff(bp_rp);
+      const rgb = teffToRGB(teff);
+      const alpha = teffToAlpha(teff);
+
+      colorsArray[colorIndex] = rgb[0];
+      colorsArray[colorIndex + 1] = rgb[1];
+      colorsArray[colorIndex + 2] = rgb[2];
       if (props.opacity) {
-        colorsArray[colorIndex + 3] = rgba[3];
+        colorsArray[colorIndex + 3] = alpha;
       } else {
         colorsArray[colorIndex + 3] = 1.0;
       }
@@ -116,7 +119,7 @@
     await nextTick();
     requestAnimationFrame(() => {
       emit("loaded");
-    });
+    }); // nextTick to ensure threeJS rendered and interactable
   });
 </script>
 
