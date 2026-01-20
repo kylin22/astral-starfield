@@ -6,7 +6,7 @@
   />
   <PointerLockControls/>
   <KeyboardControls
-    :moveSpeed="1.0"
+    :moveSpeed="moveSpeed"
   />
   <TresPoints v-if="positions.length">
     <TresBufferGeometry>
@@ -15,30 +15,31 @@
         attach="attributes-position"
       />
       <TresBufferAttribute
-        :args="[colors, 3]"
+        :args="[colors, 4]"
         attach="attributes-color"
       />
     </TresBufferGeometry>
-    <!-- <TresPointsMaterial 
-      :vertexColors="true"
-      :size="0.5" 
-      :size-attenuation="true" 
-    /> -->
     <TresShaderMaterial
       :vertex-shader="vertexShader"
       :fragment-shader="fragmentShader"
       :uniforms="{ size: { value: 2.0 } }" 
       :vertex-colors="true"
+      :transparent="true"
     />
   </TresPoints>
 </template>
 
 <script lang="ts" setup>
-  import { onMounted } from "vue"
   import { parse } from "papaparse"
-  import { bprpToRGB } from "~/utils/gaiaColorConversion"
+  import { bprpToRGBA } from "~/utils/gaiaColorConversion"
   import vertexShader from "../shaders/point.vert?raw"
   import fragmentShader from "../shaders/point.frag?raw"
+
+  const props = defineProps<{
+    moveSpeed: number,
+    opacity: boolean
+  }>()
+
   const emit = defineEmits<{
     (e: "loaded"): void
   }>()
@@ -76,11 +77,12 @@
 
     // preallocate Float32Array
     const coordsArray = new Float32Array(validCount * 3);
-    const colorsArray = new Float32Array(validCount * 3);
-    colorsArray.fill(1.0); //temp white
+    const colorsArray = new Float32Array(validCount * 4);
 
     // fill by index
-    let index = 0;
+    let coordIndex = 0;
+    let colorIndex = 0;
+
     for (const row of tempData) {
       const { x, y, z, bp_rp } = row;
       if (
@@ -90,22 +92,31 @@
         typeof bp_rp !== "number"
       ) continue;
 
-      coordsArray[index] = x;
-      coordsArray[index + 1] = y;
-      coordsArray[index + 2] = z;
+      coordsArray[coordIndex] = x;
+      coordsArray[coordIndex + 1] = y;
+      coordsArray[coordIndex + 2] = z;
+      coordIndex += 3;
 
-      const rgb = bprpToRGB(bp_rp);
-      // normalize 0-1 for TresJS
-      colorsArray[index] = rgb[0] / 255;
-      colorsArray[index + 1] = rgb[1] / 255;
-      colorsArray[index + 2] = rgb[2] / 255;
+      const rgba = bprpToRGBA(bp_rp);
+      colorsArray[colorIndex] = rgba[0];   // r
+      colorsArray[colorIndex + 1] = rgba[1];   // g
+      colorsArray[colorIndex + 2] = rgba[2];   // b
+      if (props.opacity) {
+        colorsArray[colorIndex + 3] = rgba[3];
+      } else {
+        colorsArray[colorIndex + 3] = 1.0;
+      }
 
-      index += 3;
+      colorIndex += 4;
     }
 
     positions.value = coordsArray;
     colors.value = colorsArray;
-    emit("loaded");
+
+    await nextTick();
+    requestAnimationFrame(() => {
+      emit("loaded");
+    });
   });
 </script>
 

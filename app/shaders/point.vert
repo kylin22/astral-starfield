@@ -1,7 +1,7 @@
 precision highp float;
 
 uniform float size;
-varying vec3 vColor;
+varying vec4 vColor;
 
 void main() {
     vColor = color;

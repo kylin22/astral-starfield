@@ -4,16 +4,19 @@
       LOADING<span class="dots"></span>
     </span>
   </div>
+  <!-- <Controls :moveSpeed="moveSpeed"/> -->
   <TresCanvas>
-    <Starfield @loaded="loading = false"/>
+    <Starfield :moveSpeed="moveSpeed" @loaded="loading = false"/>
   </TresCanvas>
 </template>
 
 <script setup lang="ts">
-  import { TresCanvas } from "@tresjs/core"
+  import { TresCanvas } from "@tresjs/core";
   import Starfield from "./components/Starfield.vue";
+  import Controls from "./components/Controls.vue";
 
   const loading = ref(true);
+  const moveSpeed = ref(1.0);
 </script>
 
 <style lang="scss">

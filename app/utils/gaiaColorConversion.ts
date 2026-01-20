@@ -2,7 +2,7 @@ const bprpToTeff = (bprp: number) => {
     return 5040/(0.4929+0.5092*bprp-0.0353*bprp**2);
 } 
 
-export const bprpToRGB = (bprp: number): [number, number, number] => {
+export const bprpToRGBA = (bprp: number): [number, number, number, number] => {
     // range check
     const teff = bprpToTeff(bprp);
     const colourTemperature = Math.min(40000, Math.max(1000, teff));
@@ -34,10 +34,11 @@ export const bprpToRGB = (bprp: number): [number, number, number] => {
     } else {
         blue = 138.5177312231 * Math.log(tmpInternal - 10) - 305.0447927307;
     }
-
-    return [
-        Math.min(255, Math.max(0, Math.round(red))),
-        Math.min(255, Math.max(0, Math.round(green))),
-        Math.min(255, Math.max(0, Math.round(blue))),
-    ];
+    
+    const r = Math.min(1, Math.max(0, red / 255));
+    const g = Math.min(1, Math.max(0, green / 255));
+    const b = Math.min(1, Math.max(0, blue / 255));
+    const alphaRaw = Math.pow((colourTemperature - 1000) / (40000 - 1000), 0.5); 
+    const alpha = Math.min(1, Math.max(0.2, alphaRaw));
+    return [r, g, b, alpha];
 }
